@@ -1,0 +1,16 @@
+api:
+  host: localhost
+  port: 8082
+sql:
+  host: 179.183.30.186
+  port: 3215
+  user: produtostbfg
+  password: Lucca2415@
+
+sqlLucca:
+  host: localhost
+  port: 1433
+  user: sa
+  password: <Luccasantos10@>
+
+  

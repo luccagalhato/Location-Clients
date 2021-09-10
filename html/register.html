@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SB Admin 2 - Register</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-gradient-primary">
+
+    <div class="container">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="h-auto d-inline-block col-lg-5 d-none" class="">
+                        <iframe src="https://maps.google.com/maps?q=rua do consorcio 86,saopaulo&t=&z=13&ie=UTF8&iwloc=&output=embed" id="googlemaps" frameborder="0"
+                          style="border:0;height: 100%;width:450px" allowfullscreen></iframe>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="p-5">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">Consulta de enderecos</h1>
+                            </div>
+                            <form class="user">
+                                <!-- <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" id="exampleFirstName"
+                                            placeholder="Endereço">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control form-control-user" id="exampleLastName"
+                                            placeholder="Número">
+                                    </div>
+                                </div> -->
+                                <!-- <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" id="exampleFirstName"
+                                            placeholder="Bairro">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control form-control-user" id="exampleLastName"
+                                            placeholder="Cep">
+                                    </div>
+                                </div> -->
+                                <div class="form-group">
+                                    <input type="email" class="form-control form-control-user" id="InputEndereco"
+                                        placeholder="Ex:Rua do Consóricio 86 ,Vila Nova Conceição São Paulo 04535-090, Brasil">
+                                </div>
+                                <!-- <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="password" class="form-control form-control-user"
+                                            id="exampleInputPassword" placeholder="Cidade">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="password" class="form-control form-control-user"
+                                            id="exampleRepeatPassword" placeholder="Pais">
+                                    </div>
+                                </div> -->
+                                 <a href="#" onclick="enviarEndereco()" class="btn btn-primary btn-user btn-block">
+                                    Pesquisar
+                                </a>
+                                <hr>
+                                <!-- <hr>
+                                <a href="index.html" class="btn btn-google btn-user btn-block">
+                                    <i class="fab fa-google fa-fw"></i> Register with Google
+                                </a>
+                                <a href="index.html" class="btn btn-facebook btn-user btn-block">
+                                    <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
+                                </a>
+                             --><div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr id="tr">
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr id="tr"></tr>
+                                    </tfoot>
+                                    <tbody id="tbody">
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                            </form>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="js/sb-admin-2.min.js"></script>
+    <script>
+        function enviarEndereco() {
+            
+            var insertvalue = document.getElementById("googlemaps")
+            var Inputvalue = document.getElementById("InputEndereco").value
+            Inputvalue = Inputvalue.replace(/\s/g, '');
+            insertvalue.setAttribute("src", "https://maps.google.com/maps?q=" + Inputvalue + "&t=&z=13&ie=UTF8&iwloc=&output=embed")
+            var data =  {
+                endereco: Inputvalue
+            };
+            var Input = JSON.stringify(data)
+            console.log(Input)
+            getClientsNear(Input)
+            
+        }
+        function removeAllChildNodes(parent) {
+            while (parent.firstChild) {
+                parent.removeChild(parent.firstChild);
+            }
+        }
+        async function getClientsNear(body) {
+            var myInit = {
+              method: "POST",
+              headers: new Headers(),
+              mode: "cors",
+              cache: "default",
+              body: body,
+            };
+            const response = await fetch(`${window.location.protocol}//${window.location.host}/request`, myInit);
+            const blob = await response.blob();
+            const text = await blob.text();
+            const data = JSON.parse(text)
+            if (data.Status != "OK") {
+                console.log("Error", data.Error)
+                return
+            }
+            removeAllChildNodes(document.getElementById("tbody"))
+           let endereco = data.Data
+            var a = ["Nome", "Endereço", "Distância"]
+            
+           if (document.getElementById("tr").childElementCount==0) {
+               a.forEach((col, index) => {
+                var th = document.createElement('th');
+                th.setAttribute("scope", "col");
+                th.style.fontColor = "black"
+    
+                if (index >2 && index < a.length - 1) {
+                    th.style.backgroundColor = "#1cc88a"
+                }
+                
+                th.innerHTML = col
+                document.getElementById("tr").appendChild(th)
+            })
+        }
+          
+            endereco.forEach((item, index) => {
+                var tr = document.createElement('tr');
+                tr.setAttribute("scope", "row");
+                var distance = parseFloat(item.distance).toFixed(2)
+                var tds = [item.client.NOME_CLIFOR,item.client.ENDERECO +" " +item.client.NUMERO + ", " +  item.client.BAIRRO + ", " + item.client.CIDADE + "-"+ item.client.UF, distance + " Km"]
+                console.log(item)
+                tds.forEach((col,index2) => {
+                    var td = document.createElement('td');
+                    td.innerHTML = col
+                    tr.appendChild(td)
+                })
+                document.getElementById("tbody").appendChild(tr)
+            })
+           
+            
+          }
+           
+       
+        //document.getElementById("example").innerHTML = endereco.enderecos[0] + ", " + endereco.endereco[1] + ' - ' + endereco.endereco[2] + '/' + endereco.street[0].valor
+    </script>
+</body>
+
+</html>
