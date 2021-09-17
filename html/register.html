@@ -15,10 +15,8 @@
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
-
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
-
 </head>
 
 <body class="bg-gradient-primary">
@@ -88,7 +86,9 @@
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr id="tr">
-                                            
+                                            <th data-field="id">Cliente</th>
+                                            <th data-field="name">Endereço</th>
+                                            <th data-field="price">Distância</th>  
                                         </tr>
                                     </thead>
                                     <tfoot>
@@ -112,15 +112,22 @@
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
     <!-- Core plugin JavaScript-->
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="js/demo/datatables-demo.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
 
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
     <script>
+        var $table = $("#dataTable").DataTable();
+
         function enviarEndereco() {
-            
             var insertvalue = document.getElementById("googlemaps")
             var Inputvalue = document.getElementById("InputEndereco").value
             Inputvalue = Inputvalue.replace(/\s/g, '');
@@ -130,8 +137,7 @@
             };
             var Input = JSON.stringify(data)
             console.log(Input)
-            getClientsNear(Input)
-            
+            getClientsNear(Input)   
         }
         function removeAllChildNodes(parent) {
             while (parent.firstChild) {
@@ -154,45 +160,18 @@
                 console.log("Error", data.Error)
                 return
             }
-            removeAllChildNodes(document.getElementById("tbody"))
+           removeAllChildNodes(document.getElementById("tbody"))
            let endereco = data.Data
-            var a = ["Nome", "Endereço", "Distância"]
-            
-           if (document.getElementById("tr").childElementCount==0) {
-               a.forEach((col, index) => {
-                var th = document.createElement('th');
-                th.setAttribute("scope", "col");
-                th.style.fontColor = "black"
-    
-                if (index >2 && index < a.length - 1) {
-                    th.style.backgroundColor = "#1cc88a"
-                }
-                
-                th.innerHTML = col
-                document.getElementById("tr").appendChild(th)
-            })
-        }
-          
+           var rows = [];
             endereco.forEach((item, index) => {
-                var tr = document.createElement('tr');
-                tr.setAttribute("scope", "row");
-                var distance = parseFloat(item.distance).toFixed(2)
-                var tds = [item.client.NOME_CLIFOR,item.client.ENDERECO +" " +item.client.NUMERO + ", " +  item.client.BAIRRO + ", " + item.client.CIDADE + "-"+ item.client.UF, distance + " Km"]
-                console.log(item)
-                tds.forEach((col,index2) => {
-                    var td = document.createElement('td');
-                    td.innerHTML = col
-                    tr.appendChild(td)
-                })
-                document.getElementById("tbody").appendChild(tr)
-            })
-           
-            
-          }
-           
-       
+                var distance = parseFloat(item.distance).toFixed(2);
+                rows.push([item.client.NOME_CLIFOR,item.client.ENDERECO +" " +item.client.NUMERO + ", " +  item.client.BAIRRO + ", " + item.client.CIDADE + "-"+ item.client.UF, distance + " Km"]);  
+            });
+            console.log(rows)
+            $table.rows.add(rows).draw();  
+        }
+        getClientsNear();
         //document.getElementById("example").innerHTML = endereco.enderecos[0] + ", " + endereco.endereco[1] + ' - ' + endereco.endereco[2] + '/' + endereco.street[0].valor
     </script>
 </body>
-
 </html>
