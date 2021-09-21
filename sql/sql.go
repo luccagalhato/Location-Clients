@@ -1,6 +1,9 @@
-package main
+package sql
 
 import (
+	maps "GoogleMAPS/googlemaps"
+	"GoogleMAPS/models"
+	"GoogleMAPS/utils"
 	"context"
 	"database/sql"
 	"fmt"
@@ -16,8 +19,16 @@ type SQLStr struct {
 	db  *sql.DB
 }
 
+// ConnectionLinx ...
+var ConnectionLinx *SQLStr
+
+//SetSQLConnLinx ...
+func SetSQLConnLinx(c *SQLStr) {
+	ConnectionLinx = c
+}
+
 // ConnectLinx
-func (s *SQLStr) ConnectLinx(callback func(client Clients, lat, long float64) error) error {
+func (s *SQLStr) ConnectLinx(callback func(client models.Clients, lat, long float64) error) error {
 
 	// rst := make([]*Clients, 0)
 	rows, err := s.db.QueryContext(context.Background(), `select LTRIM(RTRIM(NOME_CLIFOR)) AS NOME_CLIFOR, LTRIM(RTRIM(ENDERECO)) AS ENDERECO,LTRIM(RTRIM(COALESCE(NUMERO, ''))) AS NUMERO, LTRIM(RTRIM(BAIRRO)) AS BAIRRO, LTRIM(RTRIM(CIDADE)) AS CIDADE, LTRIM(RTRIM(CEP)) AS CEP, LTRIM(RTRIM(PAIS)) AS PAIS, LTRIM(RTRIM(CLIFOR)) from LINX_TBFG..CADASTRO_CLI_FOR
@@ -27,14 +38,14 @@ func (s *SQLStr) ConnectLinx(callback func(client Clients, lat, long float64) er
 		return err
 	}
 	for rows.Next() {
-		client := Clients{}
+		client := models.Clients{}
 
 		if err := rows.Scan(&client.Nome, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Cep, &client.Pais, &client.Clifor); err != nil {
 			fmt.Println(err, client.Clifor)
 			continue
 		}
 		// rst = append(rst, &client)
-		lat, long, err := requestMaps(client)
+		lat, long, err := maps.RequestMaps(client)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -49,8 +60,8 @@ func (s *SQLStr) ConnectLinx(callback func(client Clients, lat, long float64) er
 }
 
 type distClient struct {
-	Client   Clients `json:"client,omitempty"`
-	Distance float64 `json:"distance,omitempty"`
+	Client   models.Clients `json:"client,omitempty"`
+	Distance float64        `json:"distance,omitempty"`
 }
 
 type distClients []distClient
@@ -94,7 +105,7 @@ func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 	distClients := make(distClients, 0)
 
 	for rows.Next() {
-		client := Clients{}
+		client := models.Clients{}
 
 		if err := rows.Scan(&client.Nome, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Uf, &client.Cep, &client.Pais, &client.Clifor, &client.Latitude, &client.Longitude); err != nil {
 			fmt.Println(err)
@@ -103,7 +114,7 @@ func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 		// rst = append(rst, &client)
 		distClients = append(distClients, distClient{
 			Client:   client,
-			Distance: calcDistancia(lat, long, client.Latitude, client.Longitude),
+			Distance: utils.CalcDistancia(lat, long, client.Latitude, client.Longitude),
 		})
 	}
 

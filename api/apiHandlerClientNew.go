@@ -1,30 +1,28 @@
-package main
+package api
 
 import (
+	maps "GoogleMAPS/googlemaps"
+	"GoogleMAPS/models"
+	"GoogleMAPS/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
-var connectionLinx *SQLStr
-
-//SetSQLConnLinx ...
-func SetSQLConnLinx(c *SQLStr) {
-	connectionLinx = c
-}
+// ClientNew ...
 func ClientNew(w http.ResponseWriter, r *http.Request) { //w http.ResponseWriter, r *http.Request
-	clientNew := Street{}
+	clientNew := models.Street{}
 	if err := json.NewDecoder(r.Body).Decode(&clientNew); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(Response{
+		json.NewEncoder(w).Encode(models.Response{
 			Status: "Bad Request",
 			Error:  "",
 			Data:   err.Error(),
 		})
 		return
 	}
-	lat, long := requestMapsNewclient(clientNew)
-	data, err := connectionLinx.CompareRegion(lat, long)
+	lat, long := maps.RequestMapsNewclient(clientNew)
+	data, err := sql.ConnectionLinx.CompareRegion(lat, long)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -34,7 +32,7 @@ func ClientNew(w http.ResponseWriter, r *http.Request) { //w http.ResponseWriter
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("access-control-expose-headers", "*")
 	w.Header().Set("Content-Type", "application/octet-stream")
-	json.NewEncoder(w).Encode(Response{
+	json.NewEncoder(w).Encode(models.Response{
 		Status: "OK",
 		Error:  "",
 		Data:   data,

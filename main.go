@@ -1,6 +1,9 @@
 package main
 
 import (
+	"GoogleMAPS/api"
+	c "GoogleMAPS/config"
+	"GoogleMAPS/sql"
 	"flag"
 	"log"
 	"net/http"
@@ -8,11 +11,6 @@ import (
 
 	"github.com/gorilla/mux"
 )
-
-const apiUrl = "https://maps.googleapis.com/maps/api/geocode/json"
-const key = "AIzaSyDybcJ7PHZPP2es7YN_hd0D5OWjIR3kue0"
-
-const raio float64 = 6367
 
 //const apiKey = "AIzaSyDybcJ7PHZPP2es7YN_hd0D5OWjIR3kue0"
 var createConfig bool
@@ -22,32 +20,32 @@ func main() {
 	flag.Parse()
 
 	if createConfig {
-		CreateConfigFile()
+		c.CreateConfigFile()
 		return
 	}
 
 	log.Print("loading config file")
-	if err := LoadConfig(); err != nil {
+	if err := c.LoadConfig(); err != nil {
 		log.Fatal(err)
 	}
 
 	log.Print("connecting sql ...")
-	connection, err := MakeSQL(Config.SQL.Host, Config.SQL.Port, Config.SQL.User, Config.SQL.Password)
+	connection, err := sql.MakeSQL(c.Config.SQL.Host, c.Config.SQL.Port, c.Config.SQL.User, c.Config.SQL.Password)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	SetSQLConnLinx(connection)
-	log.Printf("starting server '%s' at port: %s", Config.API.Host, Config.API.Port)
+	sql.SetSQLConnLinx(connection)
+	log.Printf("starting server '%s' at port: %s", c.Config.API.Host, c.Config.API.Port)
 
 	r := mux.NewRouter()
 	r.PathPrefix("/html/").Handler(http.StripPrefix("/html/", http.FileServer(http.Dir("html"))))
-	r.Path("/request").Methods(http.MethodPost).HandlerFunc(ClientNew)
+	r.Path("/request").Methods(http.MethodPost).HandlerFunc(api.ClientNew)
 
 	r.Path("/").Methods(http.MethodGet).HandlerFunc(redirect)
 	server := &http.Server{
 		Handler:      r,
-		Addr:         ":" + Config.API.Port,
+		Addr:         ":" + c.Config.API.Port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
