@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Register</title>
+    <title>Localização de Clientes</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -19,12 +19,12 @@
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
 </head>
 
-<body class="bg-gradient-primary">
+<body class="navbar-dark bg-dark">
 
     <div class="container">
 
-        <div class="card o-hidden border-0 shadow-lg my-5">
-            <div class="card-body p-0">
+        <div class="card o-hidden border-0  my-5">
+            <div class="card-body p-2">
                 <!-- Nested Row within Card Body -->
                 <div class="row">
                     <div class="h-auto d-inline-block col-lg-5 d-none" class="">
@@ -37,71 +37,43 @@
                                 <h1 class="h4 text-gray-900 mb-4">Consulta de enderecos</h1>
                             </div>
                             <form class="user">
-                                <!-- <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="exampleFirstName"
-                                            placeholder="Endereço">
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control form-control-user" id="exampleLastName"
-                                            placeholder="Número">
-                                    </div>
-                                </div> -->
-                                <!-- <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="exampleFirstName"
-                                            placeholder="Bairro">
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control form-control-user" id="exampleLastName"
-                                            placeholder="Cep">
-                                    </div>
-                                </div> -->
-                                <div class="form-group">
+                                <div class="form-group d-flex justify-content-center">
                                     <input type="email" class="form-control form-control-user" id="InputEndereco"
                                         placeholder="Ex:Rua do Consóricio 86 ,Vila Nova Conceição São Paulo 04535-090, Brasil">
                                 </div>
-                                <!-- <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="password" class="form-control form-control-user"
-                                            id="exampleInputPassword" placeholder="Cidade">
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <input type="password" class="form-control form-control-user"
-                                            id="exampleRepeatPassword" placeholder="Pais">
-                                    </div>
-                                </div> -->
-                                 <a href="#" onclick="enviarEndereco()" class="btn btn-primary btn-user btn-block">
+                                <div class="d-flex justify-content-center" id="btnload1">
+                                    <a href="#" onclick="enviarEndereco()" class="btn btn-primary btn-user btn-block " 
+                                 style="width:50%">
                                     Pesquisar
                                 </a>
-                                <hr>
-                                <!-- <hr>
-                                <a href="index.html" class="btn btn-google btn-user btn-block">
-                                    <i class="fab fa-google fa-fw"></i> Register with Google
-                                </a>
-                                <a href="index.html" class="btn btn-facebook btn-user btn-block">
-                                    <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
-                                </a>
-                             --><div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr id="tr">
-                                            <th data-field="id">Cliente</th>
-                                            <th data-field="name">Endereço</th>
-                                            <th data-field="price">Distância</th>  
-                                        </tr>
-                                    </thead>
-                                    <tfoot>
-                                        <tr id="tr"></tr>
-                                    </tfoot>
-                                    <tbody id="tbody">  
-                                    </tbody>
-                                </table>
-                            </div>
+                                </div>
+                                <div class="d-none" id="btnload2">
+                                    <div class="spinner-border text-primary " role="status">
+                                        <span class="sr-only">Loading...</span>
+                                      </div>
+                                </div>
+                                
+                                </div>
                             </form>
-                            <hr>
                         </div>
                     </div>
+                </div>
+                <hr>
+                <div class="table d-none" id="table">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr id="tr">
+                                <th data-field="id">Cliente</th>
+                                <th data-field="name">Endereço</th>
+                                <th data-field="price">Distância</th>  
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr id="tr"></tr>
+                        </tfoot>
+                        <tbody id="tbody">  
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -124,11 +96,17 @@
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
     <script>
-        var $table = $("#dataTable").DataTable();
+        var $table = $("#dataTable").DataTable( {
+            "aaSorting": []
+          });
 
         function enviarEndereco() {
             var insertvalue = document.getElementById("googlemaps")
             var Inputvalue = document.getElementById("InputEndereco").value
+            var btnload1 = document.getElementById("btnload1")
+            var btnload2 = document.getElementById("btnload2")
+            btnload1.setAttribute("class","d-none")
+            btnload2.setAttribute("class","d-flex justify-content-center")
             Inputvalue = Inputvalue.replace(/\s/g, '');
             insertvalue.setAttribute("src", "https://maps.google.com/maps?q=" + Inputvalue + "&t=&z=13&ie=UTF8&iwloc=&output=embed")
             var data =  {
@@ -167,7 +145,13 @@
                 rows.push([item.client.NOME_CLIFOR,item.client.ENDERECO +" " +item.client.NUMERO + ", " +  item.client.BAIRRO + ", " + item.client.CIDADE + "-"+ item.client.UF, distance + " Km"]);  
             });
             console.log(rows)
-            $table.rows.add(rows).draw();  
+            $table.rows.add(rows).draw();
+            var btnload1 = document.getElementById("btnload1")
+            var btnload2 = document.getElementById("btnload2")
+            var table = document.getElementById("table")
+            table.setAttribute("class", "table")
+            btnload1.setAttribute("class","d-flex justify-content-center")
+            btnload2.setAttribute("class","d-none")
         }
         getClientsNear();
         //document.getElementById("example").innerHTML = endereco.enderecos[0] + ", " + endereco.endereco[1] + ' - ' + endereco.endereco[2] + '/' + endereco.street[0].valor

@@ -6,11 +6,4 @@ sql:
   port: 1433
   user: felipe.restum
   password: z12xcvab@#$
-
-sqlLucca:
-  host: localhost
-  port: 1433
-  user: sa
-  password: <Luccasantos10@>
-
   
