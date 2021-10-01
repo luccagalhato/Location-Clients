@@ -66,3 +66,34 @@ type Clients struct {
 	Latitude  float64 `json:"LATITUDE,omitempty"`
 	Longitude float64 `json:"LONGITUDE,omitempty"`
 }
+
+//Client ...
+type Client struct {
+	Nome     string  `json:"NOME_CLIFOR,omitempty"`
+	Endereco string  `json:"ENDERECO,omitempty"`
+	Numero   string  `json:"NUMERO,omitempty"`
+	Bairro   string  `json:"BAIRRO,omitempty"`
+	Cidade   string  `json:"CIDADE,omitempty"`
+	Uf       string  `json:"UF,omitempty"`
+	Cep      string  `json:"CEP,omitempty"`
+	Pais     string  `json:"PAIS,omitempty"`
+	Clifor   string  `json:"CLIFOR,omitempty"`
+	Lat      *string `json:"LAT,omitempty"`
+	Long     *string `json:"LONG,omitempty"`
+	Data     *string `json:"DATA_PARA_TRANSFERENCIA,omitempty"`
+}
+
+//Column ...
+type Column struct {
+	ColumName  string `json:"name,omitempty"`
+	ColumValue string `json:"value,omitempty"`
+}
+
+//UpdateRow ...
+type UpdateRow struct {
+	Columns   []Column `json:"columns,omitempty"`
+	Condition string   `json:"condition,omitempty"`
+}
+
+//Columns ...
+type Columns []Column

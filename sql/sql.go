@@ -132,42 +132,65 @@ func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 
 }
 
-// func (s *SQLStr) SearchClient(code string) {
-// 	// rst := make([]*Clients, 0)
-// 	rows, err := s.db.QueryContext(context.Background(), `SELECT NOME_CLIFOR,A.ENDERECO,A.NUMERO,A.BAIRRO,A.CIDADE,A.UF,A.CEP,A.PAIS,A.CLIFOR, B.LAT, B.LONG
-// FROM (SELECT * FROM LINX_TBFG..CADASTRO_CLI_FOR WHERE INDICA_CLIENTE='1' AND PJ_PF = '1') A
-// LEFT JOIN
-// (SELECT CLIENTE_ATACADO, CAST("01203" AS FLOAT) AS LAT, CAST("01204" AS FLOAT) AS LONG, DATA_PARA_TRANSFERENCIA
-// FROM
-// (
-//   SELECT CLIENTE_ATACADO, VALOR_PROPRIEDADE, PROPRIEDADE, DATA_PARA_TRANSFERENCIA
-//   FROM LINX_TBFG..PROP_CLIENTES_ATACADO
-//   WHERE PROPRIEDADE IN ('01203', '01204')
-// ) d
-// PIVOT
-// (
-//   max(VALOR_PROPRIEDADE)
-//   FOR PROPRIEDADE IN ("01203", "01204")
-// ) piv) B ON A.NOME_CLIFOR=B.CLIENTE_ATACADO
-// WHERE NOT(B.LAT IS NULL OR B.LONG IS NULL)`, nil)
-// 	if err != nil {
-// 		// fmt.Println(err)
-// 		return nil, err
-// 	}
-// 	rst := make(Clients, 0)
-// 	for rows.Next() {
-// 		client := Clients{}
+func (s *SQLStr) SearchClient() error {
+	rows, err := s.db.QueryContext(context.Background(), `SELECT LTRIM(RTRIM(NOME_CLIFOR)) AS NOME_CLIFOR,LTRIM(RTRIM(A.ENDERECO)) AS ENDERECO,LTRIM(RTRIM(A.NUMERO)) AS NUMERO,LTRIM(RTRIM(A.BAIRRO)) AS BAIRRO,LTRIM(RTRIM(A.CIDADE)) AS CIDADE,LTRIM(RTRIM(A.UF)) AS UF,LTRIM(RTRIM(A.CEP)) AS CEP,LTRIM(RTRIM(A.PAIS)) AS PAIS,LTRIM(RTRIM(A.CLIFOR)) AS CLIFOR, LTRIM(RTRIM(B.LAT)) AS LAT, LTRIM(RTRIM(B.LONG)) AS LONG, b.DATA_PARA_TRANSFERENCIA
+	FROM (SELECT * FROM LINX_TBFG..CADASTRO_CLI_FOR WHERE INDICA_CLIENTE='1' AND PJ_PF = '1') A 
+	LEFT JOIN
+	(SELECT CLIENTE_ATACADO, CAST("01203" AS FLOAT) AS LAT, CAST("01204" AS FLOAT) AS LONG, DATA_PARA_TRANSFERENCIA
+	FROM
+	(
+	  SELECT CLIENTE_ATACADO, VALOR_PROPRIEDADE, PROPRIEDADE, DATA_PARA_TRANSFERENCIA
+	  FROM LINX_TBFG..PROP_CLIENTES_ATACADO
+	  WHERE PROPRIEDADE IN ('01203', '01204')
+	) d
+	PIVOT
+	(
+	  max(VALOR_PROPRIEDADE)
+	  FOR PROPRIEDADE IN ("01203", "01204")
+	) piv) B ON A.NOME_CLIFOR=B.CLIENTE_ATACADO
+	WHERE A.DATA_PARA_TRANSFERENCIA>B.DATA_PARA_TRANSFERENCIA OR B.DATA_PARA_TRANSFERENCIA IS NULL`, nil)
+	if err != nil {
+		// fmt.Println(err)
+		return nil
+	}
+	for rows.Next() {
+		client := models.Client{}
+		if err := rows.Scan(&client.Nome, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Uf, &client.Cep, &client.Pais, &client.Clifor, &client.Lat, &client.Long, &client.Data); err != nil {
+			fmt.Println(err)
+			continue
+		}
+		lat, long := maps.RequestMapsNewclientRoutine(client)
+		if client.Data != nil {
+			ConnectionLinx.UpdateRow(fmt.Sprintf("%f", lat), "01203")
+			ConnectionLinx.UpdateRow(fmt.Sprintf("%f", long), "01204")
+			continue
+		}
+		ConnectionLinx.InsertRow(fmt.Sprintf("%f", lat), fmt.Sprintf("%f", long), client.Nome)
+	}
+	return nil
+}
+func (s *SQLStr) InsertRow(lat, long string, nome string) {
+	_, err := s.db.QueryContext(context.Background(), fmt.Sprintf(`insert into LINX_TBFG..PROP_CLIENTES_ATACADO (PROPRIEDADE,CLIENTE_ATACADO,ITEM_PROPRIEDADE, VALOR_PROPRIEDADE)
+	VALUES 
+	('01203', '%s', 1, '%s'),
+	('01204', '%s', 1, '%s);`, nome, lat, nome, long))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+func (s *SQLStr) UpdateRow(value string, condition string) {
+	_, err := s.db.QueryContext(context.Background(), fmt.Sprintf(update, table, "VALOR_PROPRIEDADE ="+value, "PROPRIEDADE="+condition))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
 
-// 		if err := rows.Scan(&client.Nome, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Uf, &client.Cep, &client.Pais, &client.Clifor, &client.Latitude, &client.Longitude); err != nil {
-// 			fmt.Println(err)
-// 			continue
-
-// 		}
-// 		rst := append(rst, &client)
-
-// 	}
-// 	return
-// }
+const (
+	update = "UPDATE %s SET %s WHERE %s"
+)
+const table = "LINX_TBFG..PROP_CLIENTES_ATACADO"
 
 //InsertSql ...
 func (s *SQLStr) InsertSql(clifor string, nome string, endereco string, numero string, bairro string, cep string, cidade string, pais string, latitude float64, longitude float64) error {
