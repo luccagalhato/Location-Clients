@@ -22,7 +22,11 @@ func ClientNew(s *sql.SQLStr) func(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		lat, long := maps.RequestMapsNewclient(clientNew)
+		lat, long, err := maps.RequestMapsNewclient(clientNew)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		data, err := s.CompareRegion(lat, long)
 		if err != nil {
 			fmt.Println(err)

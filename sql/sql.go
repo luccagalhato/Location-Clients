@@ -151,7 +151,10 @@ func (s *SQLStr) SearchClient() error {
 			fmt.Println(err)
 			continue
 		}
-		lat, long := maps.RequestMapsNewclientRoutine(client)
+		lat, long, err := maps.RequestMapsNewclientRoutine(client)
+		if err != nil {
+			fmt.Println(err)
+		}
 		if client.Data != nil {
 			s.UpdateRow(fmt.Sprintf("%f", lat), "01203")
 			s.UpdateRow(fmt.Sprintf("%f", long), "01204")

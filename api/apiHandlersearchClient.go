@@ -22,11 +22,6 @@ func SearchClient(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	//data, err := connectionLinx.SearchClient(codClifor.Code)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("access-control-expose-headers", "*")
