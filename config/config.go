@@ -20,13 +20,8 @@ var Config struct {
 		Port     string `yaml:"port,omitempty"`
 		User     string `yaml:"user,omitempty"`
 		Password string `yaml:"password,omitempty"`
+		Interval int    `yaml:"interval,omitempty"`
 	} `yaml:"sql,omitempty"`
-	SQLLucca struct {
-		Host     string `yaml:"host,omitempty"`
-		Port     string `yaml:"port,omitempty"`
-		User     string `yaml:"user,omitempty"`
-		Password string `yaml:"password,omitempty"`
-	} `yaml:"sqlLucca,omitempty"`
 }
 
 //LoadConfig ...

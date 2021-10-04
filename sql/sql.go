@@ -19,14 +19,6 @@ type SQLStr struct {
 	db  *sql.DB
 }
 
-// ConnectionLinx ...
-var ConnectionLinx *SQLStr
-
-//SetSQLConnLinx ...
-func SetSQLConnLinx(c *SQLStr) {
-	ConnectionLinx = c
-}
-
 // ConnectLinx
 func (s *SQLStr) ConnectLinx(callback func(client models.Clients, lat, long float64) error) error {
 
@@ -161,15 +153,16 @@ func (s *SQLStr) SearchClient() error {
 		}
 		lat, long := maps.RequestMapsNewclientRoutine(client)
 		if client.Data != nil {
-			ConnectionLinx.UpdateRow(fmt.Sprintf("%f", lat), "01203")
-			ConnectionLinx.UpdateRow(fmt.Sprintf("%f", long), "01204")
+			s.UpdateRow(fmt.Sprintf("%f", lat), "01203")
+			s.UpdateRow(fmt.Sprintf("%f", long), "01204")
 			continue
 		}
-		ConnectionLinx.InsertRow(fmt.Sprintf("%f", lat), fmt.Sprintf("%f", long), client.Nome)
+		s.InsertRow(fmt.Sprintf("%f", lat), fmt.Sprintf("%f", long), client.Nome)
 	}
 	return nil
 }
 func (s *SQLStr) InsertRow(lat, long string, nome string) {
+
 	_, err := s.db.QueryContext(context.Background(), fmt.Sprintf(`insert into LINX_TBFG..PROP_CLIENTES_ATACADO (PROPRIEDADE,CLIENTE_ATACADO,ITEM_PROPRIEDADE, VALOR_PROPRIEDADE)
 	VALUES 
 	('01203', '%s', 1, '%s'),
@@ -209,6 +202,11 @@ func MakeSQL(host, port, username, password string) (*SQLStr, error) {
 		RawQuery: url.Values{}.Encode(),
 	}
 	return s, s.connect()
+}
+
+//Ping ...
+func (s *SQLStr) Ping() error {
+	return s.db.Ping()
 }
 
 func (s *SQLStr) connect() error {

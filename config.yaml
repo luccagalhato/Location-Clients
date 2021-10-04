@@ -6,4 +6,5 @@ sql:
   port: 1433
   user: felipe.restum
   password: z12xcvab@#$
+  interval: 3600
   

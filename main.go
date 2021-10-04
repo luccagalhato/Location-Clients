@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"time"
 )
 
 //go:embed html
@@ -37,7 +38,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	sql.SetSQLConnLinx(connection)
+
 	htmlFS, err := fs.Sub(content, "html")
 	if err != nil {
 		log.Println(err)
@@ -46,10 +47,23 @@ func main() {
 
 	log.Printf("starting server '%s' at port: %s", c.Config.API.Host, c.Config.API.Port)
 
-	http.HandleFunc("/request", api.ClientNew)
+	go func() {
+		ticker := time.NewTicker(time.Second * time.Duration(c.Config.SQL.Interval))
+		tickerPing := time.NewTicker(time.Second * 10)
+		for {
+			select {
+			case <-ticker.C:
+				connection.SearchClient()
+			case <-tickerPing.C:
+				connection.Ping()
+			}
+		}
+	}()
+
+	http.HandleFunc("/request", api.ClientNew(connection))
 	fs := http.FileServer(http.FS(htmlFS))
 	http.Handle("/html/", http.StripPrefix("/html/", fs))
 	log.Fatal(http.ListenAndServe(":8082", nil))
 	// connection.disconnect()ClientNew
-	connection.SearchClient()
+
 }
