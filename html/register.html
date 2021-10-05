@@ -99,21 +99,25 @@
         var $table = $("#dataTable").DataTable( {
             "aaSorting": [] //Sequencial do Alfabeto desabilitado 
           });
-
+        function getElement(value) {
+            return document.getElementById(value)
+        }
+        function criarObjeto() {
+            let objeto = {};
+            return objeto;
+        }
         function enviarEndereco() {
-            var insertvalue = document.getElementById("googlemaps")
-            var Inputvalue = document.getElementById("InputEndereco").value
-            var btnload1 = document.getElementById("btnload1")
-            var btnload2 = document.getElementById("btnload2")
+            var insertvalue = getElement("googlemaps")
+            var Inputvalue = getElement("InputEndereco").value
+            var btnload1 = getElement("btnload1")
+            var btnload2 = getElement("btnload2")
             btnload1.setAttribute("class","d-none")
             btnload2.setAttribute("class","d-flex justify-content-center")
             Inputvalue = Inputvalue.replace(/\s/g, '');
             insertvalue.setAttribute("src", "https://maps.google.com/maps?q=" + Inputvalue + "&t=&z=13&ie=UTF8&iwloc=&output=embed")
-            var data =  {
-                endereco: Inputvalue
-            };
+            let data =  criarObjeto()
+            data.endereco = Inputvalue;
             var Input = JSON.stringify(data)
-            console.log(Input)
             getClientsNear(Input)   
         }
         function removeAllChildNodes(parent) {
@@ -121,34 +125,32 @@
                 parent.removeChild(parent.firstChild);
             }
         }
+        function criarInit(body) {
+          var myInit = criarObjeto();
+            myInit.method = 'POST'
+            myInit.headers = new Headers()
+            myInit.mode = 'cors'
+            myInit.cache = 'default'
+            myInit.body = body
+            return myInit
+        }
         async function getClientsNear(body) {
-            var myInit = {
-              method: "POST",
-              headers: new Headers(),
-              mode: "cors",
-              cache: "default",
-              body: body,
-            };
+            var myInit = criarInit(body)
             const response = await fetch(`${window.location.protocol}//${window.location.host}/request`, myInit);
             const blob = await response.blob();
             const text = await blob.text();
             const data = JSON.parse(text)
-            if (data.Status != "OK") {
-                console.log("Error", data.Error)
-                return
-            }
-           removeAllChildNodes(document.getElementById("tbody"))
+           removeAllChildNodes(getElement("tbody"))
            let endereco = data.Data
            var rows = [];
             endereco.forEach((item, index) => {
                 var distance = parseFloat(item.distance).toFixed(2);
                 rows.push([item.client.NOME_CLIFOR,item.client.ENDERECO +" " +item.client.NUMERO + ", " +  item.client.BAIRRO + ", " + item.client.CIDADE + "-"+ item.client.UF, distance + " Km"]);  
             });
-            console.log(rows)
             $table.rows.add(rows).draw();
-            var btnload1 = document.getElementById("btnload1")
-            var btnload2 = document.getElementById("btnload2")
-            var table = document.getElementById("table")
+            var btnload1 = getElement("btnload1")
+            var btnload2 = getElement("btnload2")
+            var table = getElement("table")
             table.setAttribute("class", "table")
             btnload1.setAttribute("class","d-flex justify-content-center")
             btnload2.setAttribute("class","d-none")

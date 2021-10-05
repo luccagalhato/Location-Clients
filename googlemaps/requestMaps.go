@@ -34,7 +34,7 @@ func RequestMaps(client models.Clients) (lat, long float64, err error) {
 
 	lat = rsp.Results[0].Geometry.Location.Lat
 	long = rsp.Results[0].Geometry.Location.Lng
-	fmt.Println(values.Encode(), lat, long)
+	//fmt.Println(values.Encode(), lat, long)
 	return
 }
 
@@ -61,7 +61,7 @@ func RequestMapsNewclient(client models.Street) (lat, long float64, err error) {
 
 	lat = rsp.Results[0].Geometry.Location.Lat
 	long = rsp.Results[0].Geometry.Location.Lng
-	fmt.Println(values.Encode(), lat, long)
+	//fmt.Println(values.Encode(), lat, long)
 	return
 }
 
@@ -88,6 +88,6 @@ func RequestMapsNewclientRoutine(client models.Client) (lat, long float64, err e
 
 	lat = rsp.Results[0].Geometry.Location.Lat
 	long = rsp.Results[0].Geometry.Location.Lng
-	fmt.Println(values.Encode(), lat, long)
+	//fmt.Println(values.Encode(), lat, long)
 	return
 }

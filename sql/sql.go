@@ -26,7 +26,7 @@ func (s *SQLStr) ConnectLinx(callback func(client models.Clients, lat, long floa
 	rows, err := s.db.QueryContext(context.Background(), `select LTRIM(RTRIM(NOME_CLIFOR)) AS NOME_CLIFOR, LTRIM(RTRIM(ENDERECO)) AS ENDERECO,LTRIM(RTRIM(COALESCE(NUMERO, ''))) AS NUMERO, LTRIM(RTRIM(BAIRRO)) AS BAIRRO, LTRIM(RTRIM(CIDADE)) AS CIDADE, LTRIM(RTRIM(CEP)) AS CEP, LTRIM(RTRIM(PAIS)) AS PAIS, LTRIM(RTRIM(CLIFOR)) from LINX_TBFG..CADASTRO_CLI_FOR
 	WHERE INDICA_CLIENTE = '1'`, nil)
 	if err != nil {
-		// fmt.Println(err)
+		fmt.Println(err)
 		return err
 	}
 	for rows.Next() {
@@ -116,9 +116,9 @@ func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 		distClients = distClients[:10]
 	}
 
-	for i := 0; i < len(distClients); i++ {
-		fmt.Printf("%+v\n", distClients[i])
-	}
+	// for i := 0; i < len(distClients); i++ {
+	// 	fmt.Printf("%+v\n", distClients[i])
+	// }
 
 	return distClients, nil
 

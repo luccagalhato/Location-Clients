@@ -63,7 +63,20 @@ func main() {
 	http.HandleFunc("/request", api.ClientNew(connection))
 	fs := http.FileServer(http.FS(htmlFS))
 	http.Handle("/html/", http.StripPrefix("/html/", fs))
+	http.HandleFunc("/", redirect)
 	log.Fatal(http.ListenAndServe(":8082", nil))
 	// connection.disconnect()ClientNew
+}
 
+func redirect(w http.ResponseWriter, r *http.Request) {
+	// remove/add not default ports from req.Host
+	target := "http://" + r.Host + "/html/register.html"
+	// log.Println(target)
+	if len(r.URL.RawQuery) > 0 {
+		target += "?" + r.URL.RawQuery
+	}
+	// log.Printf("redirect to: %s", target)
+	http.Redirect(w, r, target,
+		// see comments below and consider the codes 308, 302, or 301
+		http.StatusTemporaryRedirect)
 }

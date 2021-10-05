@@ -12,16 +12,16 @@ import (
 //Config ...
 var Config struct {
 	API struct {
-		Host string `yaml:"host,omitempty"`
-		Port string `yaml:"port,omitempty"`
-	} `yaml:"api,omitempty"`
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"api"`
 	SQL struct {
-		Host     string `yaml:"host,omitempty"`
-		Port     string `yaml:"port,omitempty"`
-		User     string `yaml:"user,omitempty"`
-		Password string `yaml:"password,omitempty"`
-		Interval int    `yaml:"interval,omitempty"`
-	} `yaml:"sql,omitempty"`
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Interval int    `yaml:"interval"`
+	} `yaml:"sql"`
 }
 
 //LoadConfig ...
