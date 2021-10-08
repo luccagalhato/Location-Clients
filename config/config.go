@@ -12,7 +12,6 @@ import (
 //Config ...
 var Config struct {
 	API struct {
-		Host string `yaml:"host"`
 		Port string `yaml:"port"`
 	} `yaml:"api"`
 	SQL struct {

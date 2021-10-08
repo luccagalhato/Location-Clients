@@ -7,8 +7,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/url"
 	"sort"
+	"time"
 
 	_ "github.com/denisenkom/go-mssqldb" //bblablalba
 )
@@ -208,8 +210,18 @@ func MakeSQL(host, port, username, password string) (*SQLStr, error) {
 }
 
 //Ping ...
-func (s *SQLStr) Ping() error {
-	return s.db.Ping()
+func (s *SQLStr) Ping() {
+
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	err := s.db.PingContext(ctx)
+	if err != nil {
+		log.Println(err)
+		log.Panicln("reconnecting")
+		if err != s.connect() {
+			log.Println(err)
+		}
+	}
+
 }
 
 func (s *SQLStr) connect() error {

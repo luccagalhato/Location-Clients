@@ -1,0 +1,52 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"sync"
+	"time"
+)
+
+func mainn() {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	log.Println("init")
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			log.Println("ctx")
+		}
+	}()
+
+	wg.Wait()
+	log.Println("finish")
+}
+
+func mainnn() {
+	qty, _ := strconv.Atoi(os.Args[1])
+
+	var wg sync.WaitGroup
+
+	now := time.Now()
+
+	wg.Add(qty)
+	for i := 0; i < qty; i++ {
+		go func(id int) {
+			defer wg.Done()
+			a := 0
+			tests := 10000000000 / qty
+			for y := 0; y < tests; y++ {
+				a += y
+			}
+			// fmt.Printf("%03d terminou\n", id)
+		}(i + 1)
+	}
+	wg.Wait()
+
+	fmt.Println(time.Now().Sub(now))
+}

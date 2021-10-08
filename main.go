@@ -45,11 +45,12 @@ func main() {
 		return
 	}
 
-	log.Printf("starting server '%s' at port: %s", c.Config.API.Host, c.Config.API.Port)
+	log.Printf("starting server at port: %s", c.Config.API.Port)
 
 	go func() {
 		ticker := time.NewTicker(time.Second * time.Duration(c.Config.SQL.Interval))
 		tickerPing := time.NewTicker(time.Second * 10)
+		connection.SearchClient()
 		for {
 			select {
 			case <-ticker.C:
