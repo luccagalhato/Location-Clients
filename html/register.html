@@ -18,11 +18,8 @@
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
 </head>
-
 <body class="navbar-dark bg-dark">
-
     <div class="container">
-
         <div class="card o-hidden border-0  my-5">
             <div class="card-body p-2">
                 <!-- Nested Row within Card Body -->
@@ -38,7 +35,7 @@
                             </div>
                             <form class="user">
                                 <div class="form-group d-flex justify-content-center">
-                                    <input type="email" class="form-control form-control-user" id="InputEndereco"
+                                    <input type="text" class="form-control form-control-user" id="InputEndereco"
                                         placeholder="Ex:Rua do Consóricio 86 ,Vila Nova Conceição São Paulo 04535-090, Brasil">
                                 </div>
                                 <div class="d-flex justify-content-center" id="btnload1">
@@ -52,7 +49,6 @@
                                         <span class="sr-only">Loading...</span>
                                       </div>
                                 </div>
-                                
                                 </div>
                             </form>
                         </div>
@@ -120,11 +116,6 @@
             var Input = JSON.stringify(data)
             getClientsNear(Input)   
         }
-        function removeAllChildNodes(parent) {
-            while (parent.firstChild) {
-                parent.removeChild(parent.firstChild);
-            }
-        }
         function criarInit(body) {
           var myInit = criarObjeto();
             myInit.method = 'POST'
@@ -140,7 +131,7 @@
             const blob = await response.blob();
             const text = await blob.text();
             const data = JSON.parse(text)
-           removeAllChildNodes(getElement("tbody"))
+            $table.rows().remove().draw()
            let endereco = data.Data
            var rows = [];
             endereco.forEach((item, index) => {
@@ -155,7 +146,6 @@
             btnload1.setAttribute("class","d-flex justify-content-center")
             btnload2.setAttribute("class","d-none")
         }
-        getClientsNear();
         //document.getElementById("example").innerHTML = endereco.enderecos[0] + ", " + endereco.endereco[1] + ' - ' + endereco.endereco[2] + '/' + endereco.street[0].valor
     </script>
 </body>
