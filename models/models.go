@@ -49,9 +49,10 @@ type Street struct {
 	Endereco string `json:"endereco,omitempty"`
 	Numero   string `json:"numero,omitempty"`
 	Bairro   string `json:"bairro,omitempty"`
+	Cidade   string `json:"cidade,omitempty"`
+	Uf       string `json:"uf,omitempty"`
 	Cep      string `json:"cep,omitempty"`
 	Pais     string `json:"pais,omitempty"`
-	Cidade   string `json:"cidade,omitempty"`
 }
 
 //Client ...
