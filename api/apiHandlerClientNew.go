@@ -6,6 +6,7 @@ import (
 	"GoogleMAPS/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -24,7 +25,7 @@ func ClientNew(s *sql.SQLStr) func(w http.ResponseWriter, r *http.Request) {
 		}
 		lat, long, err := maps.RequestMapsNewclient(clientNew)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return
 		}
 		data, err := s.CompareRegion(lat, long)

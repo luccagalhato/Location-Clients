@@ -50,11 +50,11 @@ func main() {
 	go func() {
 		ticker := time.NewTicker(time.Second * time.Duration(c.Config.SQL.Interval))
 		tickerPing := time.NewTicker(time.Second * 10)
-		connection.SearchClient()
+		connection.SearchNewClient()
 		for {
 			select {
 			case <-ticker.C:
-				connection.SearchClient()
+				connection.SearchNewClient()
 			case <-tickerPing.C:
 				connection.Ping()
 			}
@@ -65,7 +65,7 @@ func main() {
 	fs := http.FileServer(http.FS(htmlFS))
 	http.Handle("/html/", http.StripPrefix("/html/", fs))
 	http.HandleFunc("/", redirect)
-	log.Fatal(http.ListenAndServe(":8082", nil))
+	log.Fatal(http.ListenAndServe(":"+c.Config.API.Port, nil))
 	// connection.disconnect()ClientNew
 }
 
