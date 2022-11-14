@@ -4,7 +4,7 @@ api:
 sql:
   host: 10.58.192.51
   port: 1433
-  user: produtostbfg
-  password: Luccasantos10@
+  user: ti_consulta
+  password: consulta
   interval: 3600
   

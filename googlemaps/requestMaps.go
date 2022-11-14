@@ -9,9 +9,9 @@ import (
 )
 
 const apiUrl = "https://maps.googleapis.com/maps/api/geocode/json"
-const key = "AIzaSyDybcJ7PHZPP2es7YN_hd0D5OWjIR3kue0"
+const key = "AIzaSyAwKYUmAF6wk9oDhcQ-mByOebz39KLmIL4"
 
-//RequestMapsNewclient ...
+// RequestMapsNewclient ...
 func RequestMapsNewclient(client models.Street) (lat, long float64, err error) {
 	u, _ := url.Parse(apiUrl)
 

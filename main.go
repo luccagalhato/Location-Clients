@@ -9,13 +9,12 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
-	"time"
 )
 
 //go:embed html
 var content embed.FS
 
-//const apiKey = "AIzaSyDybcJ7PHZPP2es7YN_hd0D5OWjIR3kue0"
+// const apiKey = "AIzaSyDybcJ7PHZPP2es7YN_hd0D5OWjIR3kue0"
 var createConfig bool
 
 func main() {
@@ -46,20 +45,6 @@ func main() {
 	}
 
 	log.Printf("starting server at port: %s", c.Config.API.Port)
-
-	go func() {
-		ticker := time.NewTicker(time.Second * time.Duration(c.Config.SQL.Interval))
-		tickerPing := time.NewTicker(time.Second * 10)
-		connection.SearchNewClient()
-		for {
-			select {
-			case <-ticker.C:
-				connection.SearchNewClient()
-			case <-tickerPing.C:
-				connection.Ping()
-			}
-		}
-	}()
 
 	http.HandleFunc("/request", api.ClientNew(connection))
 	fs := http.FileServer(http.FS(htmlFS))

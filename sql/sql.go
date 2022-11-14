@@ -1,7 +1,6 @@
 package sql
 
 import (
-	maps "GoogleMAPS/googlemaps"
 	"GoogleMAPS/models"
 	"GoogleMAPS/utils"
 	"context"
@@ -43,22 +42,21 @@ func (d distClients) Swap(i, j int) {
 func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 
 	// rst := make([]*Clients, 0)
-	rows, err := s.db.QueryContext(context.Background(), `SELECT LTRIM(RTRIM(COALESCE(NOME_CLIFOR,''))) AS NOME_CLIFOR,LTRIM(RTRIM(COALESCE(A.ENDERECO,''))) AS ENDERECO,LTRIM(RTRIM(COALESCE(A.NUMERO,''))) AS NUMERO,LTRIM(RTRIM(COALESCE(A.BAIRRO,''))) AS BAIRRO,LTRIM(RTRIM(COALESCE(A.CIDADE,''))) AS CIDADE,LTRIM(RTRIM(COALESCE(A.UF,''))) AS UF,LTRIM(RTRIM(COALESCE(A.CEP,''))) AS CEP,LTRIM(RTRIM(COALESCE(A.PAIS,''))) AS PAIS,LTRIM(RTRIM(COALESCE(A.CLIFOR,''))) AS CLIFOR, LTRIM(RTRIM(B.LAT)) AS LAT, LTRIM(RTRIM(B.LONG)) AS LONG
-	FROM (SELECT * FROM LINX_TBFG..CADASTRO_CLI_FOR WHERE INDICA_CLIENTE='1' AND PJ_PF = '1') A 
-	LEFT JOIN
-	(SELECT CLIENTE_ATACADO, CAST("01203" AS FLOAT) AS LAT, CAST("01204" AS FLOAT) AS LONG, DATA_PARA_TRANSFERENCIA
+	rows, err := s.db.QueryContext(context.Background(), `SELECT TOP(10)A.CLIENTE_VAREJO AS NOME ,A.CODIGO_CLIENTE,A.ENDERECO,A.NUMERO,A.BAIRRO,A.CIDADE,A.UF,A.CEP,A.PAIS,LTRIM(RTRIM(B.LAT)) AS LAT, LTRIM(RTRIM(B.LONG)) AS LONG FROM CLIENTES_VAREJO A 
+    LEFT JOIN
+	(SELECT CODIGO_CLIENTE, CAST("01203" AS FLOAT) AS LAT, CAST("01204" AS FLOAT) AS LONG
 	FROM
 	(
-	  SELECT CLIENTE_ATACADO, VALOR_PROPRIEDADE, PROPRIEDADE, DATA_PARA_TRANSFERENCIA
-	  FROM LINX_TBFG..PROP_CLIENTES_ATACADO
+	  SELECT CODIGO_CLIENTE, VALOR_PROPRIEDADE, PROPRIEDADE
+	  FROM LINX_TBFG..PROP_CLIENTES_VAREJO
 	  WHERE PROPRIEDADE IN ('01203', '01204')
 	) d
 	PIVOT
 	(
 	  max(VALOR_PROPRIEDADE)
 	  FOR PROPRIEDADE IN ("01203", "01204")
-	) piv) B ON A.NOME_CLIFOR=B.CLIENTE_ATACADO
-	WHERE NOT(B.LAT IS NULL OR B.LONG IS NULL)`, nil)
+	) piv) B ON A.CODIGO_CLIENTE=B.CODIGO_CLIENTE
+    WHERE A.PF_PJ= '0' AND A.CODIGO_CLIENTE != '' AND  NOT(B.LAT IS NULL OR B.LONG IS NULL)`, nil)
 	if err != nil {
 		// fmt.Println(err)
 		return nil, err
@@ -69,7 +67,7 @@ func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 	for rows.Next() {
 		client := models.Client{}
 
-		if err := rows.Scan(&client.Nome, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Uf, &client.Cep, &client.Pais, &client.Clifor, &client.Lat, &client.Long); err != nil {
+		if err := rows.Scan(&client.Nome, &client.CodClient, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Uf, &client.Cep, &client.Pais, &client.Lat, &client.Long); err != nil {
 			fmt.Println(err)
 			continue
 		}
@@ -90,67 +88,6 @@ func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 
 }
 
-func (s *SQLStr) SearchNewClient() error {
-	rows, err := s.db.QueryContext(context.Background(), `SELECT LTRIM(RTRIM(COALESCE(NOME_CLIFOR,''))) AS NOME_CLIFOR,LTRIM(RTRIM(COALESCE(A.ENDERECO,''))) AS ENDERECO,LTRIM(RTRIM(COALESCE(A.NUMERO,''))) AS NUMERO,LTRIM(RTRIM(COALESCE(A.BAIRRO,''))) AS BAIRRO,LTRIM(RTRIM(COALESCE(A.CIDADE,''))) AS CIDADE,LTRIM(RTRIM(COALESCE(A.UF,''))) AS UF,LTRIM(RTRIM(COALESCE(A.CEP,''))) AS CEP,LTRIM(RTRIM(COALESCE(A.PAIS,''))) AS PAIS,LTRIM(RTRIM(COALESCE(A.CLIFOR,''))) AS CLIFOR, LTRIM(RTRIM(B.LAT)) AS LAT, LTRIM(RTRIM(B.LONG)) AS LONG, b.DATA_PARA_TRANSFERENCIA
-	FROM (SELECT * FROM LINX_TBFG..CADASTRO_CLI_FOR WHERE INDICA_CLIENTE='1' AND PJ_PF = '1') A 
-	LEFT JOIN
-	(SELECT CLIENTE_ATACADO, CAST("01203" AS FLOAT) AS LAT, CAST("01204" AS FLOAT) AS LONG, DATA_PARA_TRANSFERENCIA
-	FROM
-	(
-	  SELECT CLIENTE_ATACADO, VALOR_PROPRIEDADE, PROPRIEDADE, DATA_PARA_TRANSFERENCIA
-	  FROM LINX_TBFG..PROP_CLIENTES_ATACADO
-	  WHERE PROPRIEDADE IN ('01203', '01204')
-	) d
-	PIVOT
-	(
-	  max(VALOR_PROPRIEDADE)
-	  FOR PROPRIEDADE IN ("01203", "01204")
-	) piv) B ON A.NOME_CLIFOR=B.CLIENTE_ATACADO
-	WHERE A.DATA_PARA_TRANSFERENCIA>B.DATA_PARA_TRANSFERENCIA OR B.DATA_PARA_TRANSFERENCIA IS NULL`, nil)
-	if err != nil {
-		// fmt.Println(err)
-		return err
-	}
-	for rows.Next() {
-		client := models.Client{}
-		if err := rows.Scan(&client.Nome, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Uf, &client.Cep, &client.Pais, &client.Clifor, &client.Lat, &client.Long, &client.Data); err != nil {
-			fmt.Println(err)
-			continue
-		}
-		lat, long, err := maps.RequestMapsNewclientRoutine(client)
-		if err != nil || lat == 0.00 || long == 0.00 {
-			log.Println(err, "cliente:", client.Nome)
-			continue
-		}
-		if client.Data != nil {
-			s.UpdateRow(client.Nome, fmt.Sprintf("%f", lat), "01203")
-			s.UpdateRow(client.Nome, fmt.Sprintf("%f", long), "01204")
-			continue
-		}
-		s.InsertRow(fmt.Sprintf("%f", lat), fmt.Sprintf("%f", long), client.Nome)
-	}
-	return nil
-}
-func (s *SQLStr) InsertRow(lat, long string, nome string) {
-	query := fmt.Sprintf(`insert into LINX_TBFG..PROP_CLIENTES_ATACADO (PROPRIEDADE,CLIENTE_ATACADO,ITEM_PROPRIEDADE, VALOR_PROPRIEDADE)
-	VALUES 
-	('01203', '%s', 1, '%s'),
-	('01204', '%s', 1, '%s');`, nome, lat, nome, long)
-	_, err := s.db.QueryContext(context.Background(), query)
-	if err != nil {
-		fmt.Println(err, query)
-		return
-	}
-}
-func (s *SQLStr) UpdateRow(cliente, value, condition string) {
-	query := fmt.Sprintf(update, table, value, condition, cliente)
-	_, err := s.db.QueryContext(context.Background(), query)
-	if err != nil {
-		fmt.Println(err, query)
-		return
-	}
-}
-
 const (
 	update = "UPDATE %s SET VALOR_PROPRIEDADE=%s WHERE PROPRIEDAD=%s AND CLIENTE_ATACADO=%s"
 )
@@ -168,7 +105,7 @@ func MakeSQL(host, port, username, password string) (*SQLStr, error) {
 	return s, s.connect()
 }
 
-//Ping ...
+// Ping ...
 func (s *SQLStr) Ping() {
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
