@@ -42,7 +42,7 @@ func (d distClients) Swap(i, j int) {
 func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 
 	// rst := make([]*Clients, 0)
-	rows, err := s.db.QueryContext(context.Background(), `SELECT TOP(10)A.CLIENTE_VAREJO AS NOME ,A.CODIGO_CLIENTE,A.ENDERECO,A.NUMERO,A.BAIRRO,A.CIDADE,A.UF,A.CEP,A.PAIS,LTRIM(RTRIM(B.LAT)) AS LAT, LTRIM(RTRIM(B.LONG)) AS LONG FROM CLIENTES_VAREJO A 
+	rows, err := s.db.QueryContext(context.Background(), `SELECT A.CLIENTE_VAREJO AS NOME ,A.CODIGO_CLIENTE,COALESCE(A.ENDERECO,' ')AS ENDERECO,COALESCE(A.NUMERO,' ')AS NUMERO,COALESCE(A.BAIRRO,' ') AS BAIRRO ,COALESCE(A.CIDADE,' ') AS CIDADE ,COALESCE(A.UF,' ') AS UF,COALESCE(A.CEP,' ') AS CEP,COALESCE(A.PAIS,' ') AS PAIS,LTRIM(RTRIM(B.LAT)) AS LAT, LTRIM(RTRIM(B.LONG)) AS LONG, '0' FILIAL FROM CLIENTES_VAREJO A 
     LEFT JOIN
 	(SELECT CODIGO_CLIENTE, CAST("01203" AS FLOAT) AS LAT, CAST("01204" AS FLOAT) AS LONG
 	FROM
@@ -56,7 +56,24 @@ func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 	  max(VALOR_PROPRIEDADE)
 	  FOR PROPRIEDADE IN ("01203", "01204")
 	) piv) B ON A.CODIGO_CLIENTE=B.CODIGO_CLIENTE
-    WHERE A.PF_PJ= '0' AND A.CODIGO_CLIENTE != '' AND  NOT(B.LAT IS NULL OR B.LONG IS NULL)`, nil)
+    WHERE A.PF_PJ= '0' AND A.CODIGO_CLIENTE != '' AND  NOT(B.LAT IS NULL OR B.LONG IS NULL)
+    UNION 
+    SELECT A.FILIAL AS NOME ,A.COD_FILIAL,G.ENDERECO,COALESCE(G.NUMERO,' ') AS NUMERO,COALESCE(G.BAIRRO,' ') AS BAIRRO,COALESCE(G.CIDADE,' ') AS CIDADE,COALESCE(G.UF,' ') AS UF,COALESCE(G.CEP,' ') AS CEP,COALESCE(G.PAIS,' ') AS PAIS,LTRIM(RTRIM(C.LAT)) AS LAT, LTRIM(RTRIM(C.LONG)) AS LONG, '1' FILIAL FROM FILIAIS A 
+    LEFT JOIN
+	(SELECT  FILIAL,CAST("01253" AS FLOAT) AS LAT, CAST("01254" AS FLOAT) AS LONG
+	FROM
+	(
+	  SELECT FILIAL, VALOR_PROPRIEDADE, PROPRIEDADE
+	  FROM LINX_TBFG..PROP_FILIAIS
+	  WHERE PROPRIEDADE IN ('01253', '01254')
+	) d
+	PIVOT
+	(
+	  max(VALOR_PROPRIEDADE)
+	  FOR PROPRIEDADE IN ("01253", "01254")
+	) piv) C ON A.FILIAL = C.FILIAL 
+    LEFT JOIN CADASTRO_CLI_FOR G ON A.CLIFOR = G.CLIFOR
+    WHERE G.PJ_PF = '1' AND A.COD_FILIAL != '' AND  NOT(C.LAT IS NULL OR C.LONG IS NULL)`, nil)
 	if err != nil {
 		// fmt.Println(err)
 		return nil, err
@@ -67,7 +84,7 @@ func (s *SQLStr) CompareRegion(lat, long float64) ([]distClient, error) {
 	for rows.Next() {
 		client := models.Client{}
 
-		if err := rows.Scan(&client.Nome, &client.CodClient, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Uf, &client.Cep, &client.Pais, &client.Lat, &client.Long); err != nil {
+		if err := rows.Scan(&client.Nome, &client.CodClient, &client.Endereco, &client.Numero, &client.Bairro, &client.Cidade, &client.Uf, &client.Cep, &client.Pais, &client.Lat, &client.Long, &client.IndicaFilial); err != nil {
 			fmt.Println(err)
 			continue
 		}

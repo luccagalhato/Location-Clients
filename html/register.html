@@ -58,6 +58,7 @@
                             <th data-field="id">Cliente</th>
                             <th data-field="name">Endereço</th>
                             <th data-field="price">Distância</th>
+                            <th data-field="price">Indica - Filial</th>
                         </tr>
                     </thead>
                     <tfoot>
@@ -108,8 +109,7 @@
             var btnload2 = getElement("btnload2")
             btnload1.setAttribute("class", "d-none")
             btnload2.setAttribute("class", "d-flex justify-content-center")
-            Inputvalue = Inputvalue.replace(/\s/g, '');
-            insertvalue.setAttribute("src", "https://maps.google.com/maps?q=" + Inputvalue + "&t=&z=13&ie=UTF8&iwloc=&output=embed")
+            insertvalue.setAttribute("src", "https://maps.google.com/maps?q=" + encodeURI(Inputvalue) + "&t=&z=13&ie=UTF8&iwloc=&output=embed")
             let data = criarObjeto()
             data.endereco = Inputvalue;
             var Input = JSON.stringify(data)
@@ -128,15 +128,17 @@
         async function getClientsNear(body) {
             var myInit = criarInit(body)
             const response = await fetch(`${window.location.protocol}//${window.location.host}/request`, myInit);
+            console.log(response);
             const blob = await response.blob();
             const text = await blob.text();
+
             const data = JSON.parse(text)
             $table.rows().remove().draw()
             let endereco = data.Data
             var rows = [];
             endereco.forEach((item, index) => {
                 var distance = parseFloat(item.distance).toFixed(2);
-                rows.push([item.client.NOME, item.client.ENDERECO + " " + item.client.NUMERO + ", " + item.client.BAIRRO + ", " + item.client.CIDADE + "-" + item.client.UF, distance + " Km"]);
+                rows.push([item.client.NOME, item.client.ENDERECO + " " + item.client.NUMERO + ", " + item.client.BAIRRO + ", " + item.client.CIDADE + "-" + item.client.UF, distance + " Km", item.client.INDICA_FILIAL]);
             });
             $table.rows.add(rows).draw();
             var btnload1 = getElement("btnload1")
